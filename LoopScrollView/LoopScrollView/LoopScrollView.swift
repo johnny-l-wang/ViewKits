@@ -25,7 +25,8 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
     
     private var scale:(widthScale:CGFloat,heightScale:CGFloat)=(widthScale:0.6,heightScale:1)
     private var contentSize:CGSize!
-    private var views:[UIView]!
+    private var contentSpace:CGFloat!
+    private var contents:[UIView]!
     private var count:Int{
         get{
             if let datasource = self.datasource {
@@ -37,22 +38,22 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
     }
     
     override func drawRect(rect: CGRect) {
-        self.views = []
+        self.contents = []
         self.contentSize = CGSizeMake(rect.width*self.scale.widthScale, rect.height*self.scale.heightScale)
         
         for _ in 0...3{
             let view=UIView(frame: CGRectMake(0,0,self.contentSize.width,self.contentSize.height))
             view.backgroundColor=UIColor.clearColor()
-            self.views.append(view)
+            self.contents.append(view)
         }
     }
     
     func load(index:Int=0) {
-        self.currentIndex=index;
+        self.currentIndex = index;
         
-        var indexOfView=index;
+        var indexOfView = index;
         
-        for index in 0..<views.count {
+        for index in 0..<contents.count {
             if let datasource = self.datasource {
                 if index == 0 {
                     indexOfView = self.preIndex(indexOfView, direction: .Left)
@@ -60,7 +61,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
                 else{
                     indexOfView = self.nextIndex(indexOfView, direction: .Left)
                 }
-                self.views[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
+                self.contents[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
             }
         }
     }
