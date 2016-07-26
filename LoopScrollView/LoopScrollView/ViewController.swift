@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  loop-scroll-view
+//  LoopScrollView
 //
 //  Created by Johnny on 16/7/26.
 //  Copyright © 2016年 IDI Studio. All rights reserved.
