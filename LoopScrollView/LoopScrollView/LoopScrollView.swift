@@ -37,8 +37,8 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
     }
     
     override func drawRect(rect: CGRect) {
-        self.views=[]
-        self.contentSize=CGSizeMake(rect.width*self.scale.widthScale, rect.height*self.scale.heightScale)
+        self.views = []
+        self.contentSize = CGSizeMake(rect.width*self.scale.widthScale, rect.height*self.scale.heightScale)
         
         for _ in 0...3{
             let view=UIView(frame: CGRectMake(0,0,self.contentSize.width,self.contentSize.height))
@@ -54,10 +54,13 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
         
         for index in 0..<views.count {
             if let datasource = self.datasource {
-                self.views[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
-                if index > 0 {
-                    indexOfView=self.nextIndex(indexOfView, direction: .Left)
+                if index == 0 {
+                    indexOfView = self.preIndex(indexOfView, direction: .Left)
                 }
+                else{
+                    indexOfView = self.nextIndex(indexOfView, direction: .Left)
+                }
+                self.views[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
             }
         }
     }
@@ -74,5 +77,17 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
         
         return nextIndex
     }
-
+    
+    private func preIndex(currentIndex:Int,direction:Direction)->Int{
+        var preIndex:Int=0
+        
+        switch direction {
+        case .Right:
+            preIndex = currentIndex + 1 == self.count ? 0 : currentIndex + 1
+        case .Left:
+            preIndex = currentIndex - 1 < 0 ? self.count - 1 : currentIndex - 1
+        }
+        
+        return preIndex
+    }
 }
