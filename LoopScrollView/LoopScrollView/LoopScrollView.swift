@@ -3,7 +3,7 @@
 //  LoopScrollView
 //
 //  Created by Johnny L Wang on 16/7/26.
-//  Copyright © 2016年 IDI Studio. All rights reserved.
+//  Copyright © 2016 IDI Studio. All rights reserved.
 //
 
 import UIKit
