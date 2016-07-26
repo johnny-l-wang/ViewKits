@@ -26,7 +26,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
     private var scale:(widthScale:CGFloat,heightScale:CGFloat)=(widthScale:0.6,heightScale:1)
     private var contentSize:CGSize!
     private var contentSpace:CGFloat!
-    private var contents:[UIView]!
+    private var contents:[UIView]=[]
     private var count:Int{
         get{
             if let datasource = self.datasource {
@@ -36,24 +36,19 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
             return 0
         }
     }
-    
-    override func drawRect(rect: CGRect) {
-        self.contents = []
-        self.contentSize = CGSizeMake(rect.width*self.scale.widthScale, rect.height*self.scale.heightScale)
-        
-        for _ in 0...3{
-            let view=UIView(frame: CGRectMake(0,0,self.contentSize.width,self.contentSize.height))
-            view.backgroundColor=UIColor.clearColor()
-            self.contents.append(view)
-        }
-    }
+
+//    override func drawRect(rect: CGRect) {
+//       
+//    }
     
     func load(index:Int=0) {
+        initUI(self.frame)
+        
         self.currentIndex = index;
         
         var indexOfView = index;
         
-        for index in 0..<contents.count {
+        for index in 0..<self.contents.count {
             if let datasource = self.datasource {
                 if index == 0 {
                     indexOfView = self.preIndex(indexOfView, direction: .Left)
@@ -63,6 +58,27 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
                 }
                 self.contents[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
             }
+        }
+    }
+    
+    private func initUI(frame: CGRect) {
+        self.contents = []
+        self.contentSize = CGSizeMake(frame.width*self.scale.widthScale, frame.height*self.scale.heightScale)
+        self.contentSpace = frame.width*(1-self.scale.widthScale)/4
+        
+        print("self.frame=\(frame)")
+        print("self.contentSize=\(self.contentSize)")
+        print("self.contentSpace=\(self.contentSpace)")
+        
+        var x:CGFloat = 0 - self.contentSize.width + self.contentSpace
+        
+        for _ in 0...3 {
+            let view=UIView(frame: CGRectMake(x,0,self.contentSize.width,self.contentSize.height))
+            view.backgroundColor=UIColor.clearColor()
+            self.contents.append(view)
+            self.addSubview(view)
+            
+            x += (self.contentSpace + self.contentSize.width)
         }
     }
     
