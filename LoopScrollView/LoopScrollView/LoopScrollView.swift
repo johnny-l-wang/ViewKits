@@ -26,6 +26,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
     private var scale:(widthScale:CGFloat,heightScale:CGFloat)=(widthScale:0.6,heightScale:1)
     private var contentSize:CGSize!
     private var contentSpace:CGFloat!
+    private var contentDistance:CGFloat!
     private var contents:[UIView]=[]
     private var count:Int{
         get{
@@ -35,6 +36,85 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
             
             return 0
         }
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        
+        //右划手势
+        let swipeRightGesture = UISwipeGestureRecognizer(target: self, action: #selector(LoopScrollView.handleSwipeGesture(_:)) )
+        swipeRightGesture.direction = UISwipeGestureRecognizerDirection.Right
+        self.addGestureRecognizer(swipeRightGesture)
+        
+        //左划手势
+        let swipeLeftGesture = UISwipeGestureRecognizer(target: self, action: #selector(LoopScrollView.handleSwipeGesture(_:)))
+        swipeLeftGesture.direction = UISwipeGestureRecognizerDirection.Left
+        self.addGestureRecognizer(swipeLeftGesture)
+    }
+    
+    func handleSwipeGesture(sender: UISwipeGestureRecognizer){
+        switch sender.direction {
+        case UISwipeGestureRecognizerDirection.Right:
+            moveCard(Direction.Right)
+        case UISwipeGestureRecognizerDirection.Left:
+            moveCard(Direction.Left)
+        default:
+            return
+        }
+    }
+
+    private func moveCard(direction:Direction){
+        
+        //preloadView(direction)
+        
+        let moveAnimation = CABasicAnimation(keyPath: "position.x")
+        moveAnimation.fillMode = kCAFillModeBoth
+        moveAnimation.duration = 0.3
+        
+        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
+        scaleAnimation.fillMode = kCAFillModeBoth
+        scaleAnimation.duration = 0.3
+        
+        let distance = direction == .Right ? self.contentDistance : -self.contentDistance
+        
+        for index in 0..<self.contents.count {
+            let card = self.contents[index]
+            
+            let from = card.frame.origin.x + self.contentSize.width * 0.5
+            moveAnimation.fromValue = from
+            moveAnimation.toValue = from + distance
+            
+            card.layer.addAnimation(moveAnimation, forKey: "MoveCard")
+            card.layer.position.x = from + distance
+            
+            if index == 1 {
+                scaleAnimation.fromValue = 1
+                scaleAnimation.toValue = 0.8
+                card.transform = CGAffineTransformMakeScale(1,0.8)
+            }
+            else{
+                scaleAnimation.fromValue = 0.8
+                scaleAnimation.toValue = 1
+                card.transform = CGAffineTransformMakeScale(1,1)
+            }
+            
+            card.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
+        }
+        
+        //swapCrads()
+        
+        switch direction {
+        case .Right:
+            //move the last card to first
+            self.contents[self.contents.count - 1].layer.position.x = self.contents[0].layer.position.x-self.contentDistance
+        case .Left:
+            //move the first card to last
+            self.contents[0].layer.position.x = self.contents[self.contents.count - 1].layer.position.x+self.contentDistance
+        }
+        self.currentIndex=nextIndex(self.currentIndex, direction: direction)
+        self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
+        
+        //swapCrads()
     }
 
 //    override func drawRect(rect: CGRect) {
@@ -65,6 +145,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
         self.contents = []
         self.contentSize = CGSizeMake(frame.width*self.scale.widthScale, frame.height*self.scale.heightScale)
         self.contentSpace = frame.width*(1-self.scale.widthScale)/4
+        self.contentDistance = self.contentSpace + self.contentSize.width
         
         print("self.frame=\(frame)")
         print("self.contentSize=\(self.contentSize)")
@@ -78,7 +159,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
             self.contents.append(view)
             self.addSubview(view)
             
-            x += (self.contentSpace + self.contentSize.width)
+            x += self.contentDistance
         }
     }
     
