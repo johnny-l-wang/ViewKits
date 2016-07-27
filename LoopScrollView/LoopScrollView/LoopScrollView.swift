@@ -86,6 +86,8 @@ internal class ContentView:UIView {
 
     private func moveCard(direction:Direction){
         
+        preload(direction)
+        
         let moveAnimation = CABasicAnimation(keyPath: "position.x")
         moveAnimation.fillMode = kCAFillModeBoth
         moveAnimation.duration = 0.3
@@ -120,6 +122,8 @@ internal class ContentView:UIView {
             content.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
         }
         
+         self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+        
         switch direction {
         case .Right:
             //move the last card to first
@@ -129,23 +133,20 @@ internal class ContentView:UIView {
             self.contents[0].layer.position.x = self.contents[self.contents.count - 1].layer.position.x+self.contentDistance
         }
         
-        //self.currentIndex=nextIndex(self.currentIndex, direction: direction)
         self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
-        
-        preload(direction)
+        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
     }
     
     private func preload(direction:Direction){
-        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
-        
-        let content = self.contents[2]
-        let indexOfView  = nextIndex(content.indexOfView!, direction: direction)
+        //self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+
+        let indexOfView  = nextIndex(self.contents[2].indexOfView!, direction: direction)
         
         print("indexOfView=\(indexOfView)")
         
         if let datasource = self.datasource {
             let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
-            content.attach(indexOfView, view: view)
+            self.contents[2].attach(indexOfView, view: view)
         }
     }
     
@@ -169,6 +170,11 @@ internal class ContentView:UIView {
         }
     }
     
+    override public func drawRect(rect: CGRect) {
+        initUI(rect)
+        load(0)
+    }
+    
     private func initUI(frame: CGRect) {
         for view in self.subviews{
             view.removeFromSuperview()
@@ -178,9 +184,9 @@ internal class ContentView:UIView {
         self.contentSpace = frame.width*(1-self.scale.widthScale)/4
         self.contentDistance = self.contentSpace + self.contentSize.width
         
-        print("self.frame=\(frame)")
-        print("self.contentSize=\(self.contentSize)")
-        print("self.contentSpace=\(self.contentSpace)")
+//        print("self.frame=\(frame)")
+//        print("self.contentSize=\(self.contentSize)")
+//        print("self.contentSpace=\(self.contentSpace)")
         
         var x:CGFloat = 0 - self.contentSize.width + self.contentSpace
         
