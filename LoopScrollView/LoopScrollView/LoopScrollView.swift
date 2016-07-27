@@ -8,12 +8,35 @@
 
 import UIKit
 
-protocol LoopScrollViewDataSource:NSObjectProtocol {
+public protocol LoopScrollViewDataSource:NSObjectProtocol {
     func loopScrollView(size:CGSize,indexOfView:Int) -> UIView
     func loopScrollViewCount() -> Int
 }
 
-@IBDesignable class LoopScrollView: UIView {
+internal class ContentView:UIView {
+    
+    private var indexOfView:Int?
+    private  var view:UIView?
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    func attach(indexOfView:Int,view:UIView){
+        if self.view != nil{
+            self.view?.removeFromSuperview()
+        }
+        self.view=view;
+        self.indexOfView=indexOfView
+        self.addSubview(view)
+    }
+}
+
+@IBDesignable public class LoopScrollView: UIView {
 
     var currentIndex:Int=0
     var datasource:LoopScrollViewDataSource?
@@ -38,7 +61,7 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
         }
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
         //右划手势
@@ -101,8 +124,6 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
             card.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
         }
         
-        //swapCrads()
-        
         switch direction {
         case .Right:
             //move the last card to first
@@ -111,10 +132,11 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
             //move the first card to last
             self.contents[0].layer.position.x = self.contents[self.contents.count - 1].layer.position.x+self.contentDistance
         }
+        
         self.currentIndex=nextIndex(self.currentIndex, direction: direction)
         self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
         
-        //swapCrads()
+        resort()
     }
 
 //    override func drawRect(rect: CGRect) {
@@ -187,5 +209,9 @@ protocol LoopScrollViewDataSource:NSObjectProtocol {
         }
         
         return preIndex
+    }
+    
+    private func resort(){
+        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
     }
 }
