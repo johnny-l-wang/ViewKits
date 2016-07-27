@@ -17,8 +17,8 @@ class ViewController: UIViewController,LoopScrollViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print("bounds=\(UIScreen.mainScreen().bounds)")
-        print("self.loopscrollview.frame=\(self.loopscrollview.frame)")
+        //print("bounds=\(UIScreen.mainScreen().bounds)")
+        //print("self.loopscrollview.frame=\(self.loopscrollview.frame)")
         // Do any additional setup after loading the view, typically from a nib.
         self.loopscrollview.datasource=self
         

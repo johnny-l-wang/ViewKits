@@ -16,7 +16,6 @@ public protocol LoopScrollViewDataSource:NSObjectProtocol {
 internal class ContentView:UIView {
     
     private var indexOfView:Int?
-    private  var view:UIView?
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -27,10 +26,9 @@ internal class ContentView:UIView {
     }
     
     func attach(indexOfView:Int,view:UIView){
-        if self.view != nil{
-            self.view?.removeFromSuperview()
+        if self.subviews.count>0 {
+            self.subviews[0].removeFromSuperview()
         }
-        self.view=view;
         self.indexOfView=indexOfView
         self.addSubview(view)
     }
@@ -137,6 +135,20 @@ internal class ContentView:UIView {
         preload(direction)
     }
     
+    private func preload(direction:Direction){
+        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+        
+        let content = self.contents[2]
+        let indexOfView  = nextIndex(content.indexOfView!, direction: direction)
+        
+        print("indexOfView=\(indexOfView)")
+        
+        if let datasource = self.datasource {
+            let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
+            content.attach(indexOfView, view: view)
+        }
+    }
+    
     func load(index:Int=0) {
         initUI(self.frame)
         
@@ -157,21 +169,11 @@ internal class ContentView:UIView {
         }
     }
     
-    private func preload(direction:Direction){
-        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
-        
-//        let content = self.contents[2]
-//        
-//        let indexOfView  = nextIndex(content.indexOfView!, direction: direction)
-//        
-//        if let datasource = self.datasource {
-//            let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
-//            content.attach(indexOfView, view: view)
-//        }
-    }
-    
     private func initUI(frame: CGRect) {
-        self.contents = []
+        for view in self.subviews{
+            view.removeFromSuperview()
+        }
+        self.contents=[]
         self.contentSize = CGSizeMake(frame.width*self.scale.widthScale, frame.height*self.scale.heightScale)
         self.contentSpace = frame.width*(1-self.scale.widthScale)/4
         self.contentDistance = self.contentSpace + self.contentSize.width
@@ -183,10 +185,10 @@ internal class ContentView:UIView {
         var x:CGFloat = 0 - self.contentSize.width + self.contentSpace
         
         for _ in 0...3 {
-            let view=ContentView(frame: CGRectMake(x,0,self.contentSize.width,self.contentSize.height))
-            view.backgroundColor=UIColor.clearColor()
-            self.contents.append(view)
-            self.addSubview(view)
+            let content=ContentView(frame: CGRectMake(x,0,self.contentSize.width,self.contentSize.height))
+            content.backgroundColor=UIColor.clearColor()
+            self.contents.append(content)
+            self.addSubview(content)
             
             x += self.contentDistance
         }
@@ -216,9 +218,5 @@ internal class ContentView:UIView {
         }
         
         return preIndex
-    }
-    
-    private func resort(){
-        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
     }
 }
