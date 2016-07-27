@@ -50,7 +50,7 @@ internal class ContentView:UIView {
     private var contentSize:CGSize!
     private var contentSpace:CGFloat!
     private var contentDistance:CGFloat!
-    private var contents:[UIView]=[]
+    private var contents:[ContentView]=[]
     private var count:Int{
         get{
             if let datasource = self.datasource {
@@ -88,8 +88,6 @@ internal class ContentView:UIView {
 
     private func moveCard(direction:Direction){
         
-        //preloadView(direction)
-        
         let moveAnimation = CABasicAnimation(keyPath: "position.x")
         moveAnimation.fillMode = kCAFillModeBoth
         moveAnimation.duration = 0.3
@@ -101,27 +99,27 @@ internal class ContentView:UIView {
         let distance = direction == .Right ? self.contentDistance : -self.contentDistance
         
         for index in 0..<self.contents.count {
-            let card = self.contents[index]
+            let content = self.contents[index]
             
-            let from = card.frame.origin.x + self.contentSize.width * 0.5
+            let from = content.frame.origin.x + self.contentSize.width * 0.5
             moveAnimation.fromValue = from
             moveAnimation.toValue = from + distance
             
-            card.layer.addAnimation(moveAnimation, forKey: "MoveCard")
-            card.layer.position.x = from + distance
+            content.layer.addAnimation(moveAnimation, forKey: "MoveCard")
+            content.layer.position.x = from + distance
             
             if index == 1 {
                 scaleAnimation.fromValue = 1
                 scaleAnimation.toValue = 0.8
-                card.transform = CGAffineTransformMakeScale(1,0.8)
+                content.transform = CGAffineTransformMakeScale(1,0.8)
             }
             else{
                 scaleAnimation.fromValue = 0.8
                 scaleAnimation.toValue = 1
-                card.transform = CGAffineTransformMakeScale(1,1)
+                content.transform = CGAffineTransformMakeScale(1,1)
             }
             
-            card.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
+            content.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
         }
         
         switch direction {
@@ -133,15 +131,11 @@ internal class ContentView:UIView {
             self.contents[0].layer.position.x = self.contents[self.contents.count - 1].layer.position.x+self.contentDistance
         }
         
-        self.currentIndex=nextIndex(self.currentIndex, direction: direction)
+        //self.currentIndex=nextIndex(self.currentIndex, direction: direction)
         self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
         
-        resort()
+        preload(direction)
     }
-
-//    override func drawRect(rect: CGRect) {
-//       
-//    }
     
     func load(index:Int=0) {
         initUI(self.frame)
@@ -158,9 +152,22 @@ internal class ContentView:UIView {
                 else{
                     indexOfView = self.nextIndex(indexOfView, direction: .Left)
                 }
-                self.contents[index].addSubview(datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
+                self.contents[index].attach(indexOfView, view: datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
             }
         }
+    }
+    
+    private func preload(direction:Direction){
+        self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+        
+//        let content = self.contents[2]
+//        
+//        let indexOfView  = nextIndex(content.indexOfView!, direction: direction)
+//        
+//        if let datasource = self.datasource {
+//            let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
+//            content.attach(indexOfView, view: view)
+//        }
     }
     
     private func initUI(frame: CGRect) {
@@ -176,7 +183,7 @@ internal class ContentView:UIView {
         var x:CGFloat = 0 - self.contentSize.width + self.contentSpace
         
         for _ in 0...3 {
-            let view=UIView(frame: CGRectMake(x,0,self.contentSize.width,self.contentSize.height))
+            let view=ContentView(frame: CGRectMake(x,0,self.contentSize.width,self.contentSize.height))
             view.backgroundColor=UIColor.clearColor()
             self.contents.append(view)
             self.addSubview(view)
