@@ -76,15 +76,15 @@ internal class ContentView:UIView {
     func handleSwipeGesture(sender: UISwipeGestureRecognizer){
         switch sender.direction {
         case UISwipeGestureRecognizerDirection.Right:
-            moveCard(Direction.Right)
+            move(Direction.Right)
         case UISwipeGestureRecognizerDirection.Left:
-            moveCard(Direction.Left)
+            move(Direction.Left)
         default:
             return
         }
     }
 
-    private func moveCard(direction:Direction){
+    private func move(direction:Direction){
         
         preload(direction)
         
@@ -122,7 +122,7 @@ internal class ContentView:UIView {
             content.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
         }
         
-         self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+        //self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
         
         switch direction {
         case .Right:
@@ -135,18 +135,25 @@ internal class ContentView:UIView {
         
         self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
         self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
+        //preload(direction)
     }
     
     private func preload(direction:Direction){
-        //self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
 
-        let indexOfView  = nextIndex(self.contents[2].indexOfView!, direction: direction)
+        var indexOfView=self.contents[3].indexOfView!
+        
+        switch direction {
+        case .Right:
+            indexOfView=nextIndex(self.contents[0].indexOfView!, direction: .Right)
+        case .Left:
+            indexOfView=preIndex(self.contents[2].indexOfView!, direction: .Right)
+        }
         
         print("indexOfView=\(indexOfView)")
         
         if let datasource = self.datasource {
             let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
-            self.contents[2].attach(indexOfView, view: view)
+            self.contents[3].attach(indexOfView, view: view)
         }
     }
     
