@@ -85,6 +85,11 @@ internal class ContentView:UIView {
     }
 
     private func move(direction:Direction){
+        if self.count==0 || self.contents.count==0 {
+            print("self.count=\(self.count)")
+            print("self.contents.count=\(self.contents.count)")
+            return
+        }
         
         preload(direction)
         
@@ -136,24 +141,25 @@ internal class ContentView:UIView {
     }
     
     private func preload(direction:Direction){
-
-        var indexOfView=self.contents[3].indexOfView!
-        
-        switch direction {
-        case .Right:
-            indexOfView=preIndex(self.contents[0].indexOfView!)
-        case .Left:
-            indexOfView=nextIndex(self.contents[2].indexOfView!)
-        }
-        
-        if let datasource = self.datasource {
-            let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
-            self.contents[3].attach(indexOfView, view: view)
+        if var indexOfView = self.contents[3].indexOfView {
+            switch direction {
+            case .Right:
+                indexOfView=preIndex(self.contents[0].indexOfView!)
+            case .Left:
+                indexOfView=nextIndex(self.contents[2].indexOfView!)
+            }
+            
+            if let datasource = self.datasource {
+                let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
+                self.contents[3].attach(indexOfView, view: view)
+            }
         }
     }
     
-    func load(index:Int=0) {
+    private func load(index:Int=0) {
         initUI(self.frame)
+        
+        //print("self.frame=\(self.frame)")
         
         var indexOfView = 0;
         
@@ -161,8 +167,8 @@ internal class ContentView:UIView {
             self.currentIndex = 0;
         }
         else{
-            self.currentIndex = index;
-            indexOfView = index;
+            self.currentIndex = preIndex(index);
+            indexOfView = preIndex(index);
         }
         
         for index in 0..<self.contents.count {
@@ -178,7 +184,7 @@ internal class ContentView:UIView {
     
     override public func drawRect(rect: CGRect) {
         initUI(rect)
-        load(0)
+        load(self.currentIndex)
     }
     
     private func initUI(frame: CGRect) {
