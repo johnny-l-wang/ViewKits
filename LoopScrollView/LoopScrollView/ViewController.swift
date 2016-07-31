@@ -18,7 +18,7 @@ class ViewController: UIViewController,LoopScrollViewDataSource {
         super.viewDidLoad()
         
         self.loopscrollview.datasource=self
-        self.loopscrollview.load()
+        self.loopscrollview.load(4)
     }
 
     override func didReceiveMemoryWarning() {

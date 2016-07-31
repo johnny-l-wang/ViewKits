@@ -141,12 +141,10 @@ internal class ContentView:UIView {
         
         switch direction {
         case .Right:
-            indexOfView=nextIndex(self.contents[0].indexOfView!, direction: .Right)
+            indexOfView=preIndex(self.contents[0].indexOfView!)
         case .Left:
-            indexOfView=preIndex(self.contents[2].indexOfView!, direction: .Right)
+            indexOfView=nextIndex(self.contents[2].indexOfView!)
         }
-        
-        print("indexOfView=\(indexOfView)")
         
         if let datasource = self.datasource {
             let view=datasource.loopScrollView(self.contentSize, indexOfView: indexOfView)
@@ -157,18 +155,22 @@ internal class ContentView:UIView {
     func load(index:Int=0) {
         initUI(self.frame)
         
-        self.currentIndex = index;
+        var indexOfView = 0;
         
-        var indexOfView = index;
+        if index >= self.count {
+            self.currentIndex = 0;
+        }
+        else{
+            self.currentIndex = index;
+            indexOfView = index;
+        }
         
         for index in 0..<self.contents.count {
             if let datasource = self.datasource {
-                if index == 0 {
-                    indexOfView = self.preIndex(indexOfView, direction: .Left)
+                if index>0 {
+                    indexOfView = self.nextIndex(indexOfView)
                 }
-                else{
-                    indexOfView = self.nextIndex(indexOfView, direction: .Left)
-                }
+                print("load:\(indexOfView)")
                 self.contents[index].attach(indexOfView, view: datasource.loopScrollView(self.contentSize,indexOfView: indexOfView))
             }
         }
@@ -201,29 +203,11 @@ internal class ContentView:UIView {
         }
     }
     
-    private func nextIndex(currentIndex:Int,direction:Direction )->Int{
-        var nextIndex:Int=0
-        
-        switch direction {
-        case .Right:
-            nextIndex = currentIndex - 1 < 0 ? self.count - 1 : currentIndex - 1
-        case .Left:
-            nextIndex = currentIndex + 1 == self.count ? 0 : currentIndex + 1
-        }
-        
-        return nextIndex
+    private func nextIndex(currentIndex:Int)->Int{
+        return (currentIndex + 1 == self.count) ? 0 : currentIndex + 1
     }
     
-    private func preIndex(currentIndex:Int,direction:Direction)->Int{
-        var preIndex:Int=0
-        
-        switch direction {
-        case .Right:
-            preIndex = currentIndex + 1 == self.count ? 0 : currentIndex + 1
-        case .Left:
-            preIndex = currentIndex - 1 < 0 ? self.count - 1 : currentIndex - 1
-        }
-        
-        return preIndex
+    private func preIndex(currentIndex:Int)->Int{
+        return (currentIndex - 1 < 0) ? self.count - 1 : currentIndex - 1
     }
 }
