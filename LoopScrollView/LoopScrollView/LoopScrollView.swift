@@ -44,7 +44,7 @@ internal class ContentView:UIView {
         case Right
     }
     
-    private var scale:(widthScale:CGFloat,heightScale:CGFloat)=(widthScale:0.6,heightScale:1)
+    private var scale:(widthScale:CGFloat,heightScale:CGFloat)=(widthScale:0.65,heightScale:0.8)
     private var contentSize:CGSize!
     private var contentSpace:CGFloat!
     private var contentDistance:CGFloat!
@@ -204,9 +204,11 @@ internal class ContentView:UIView {
             content.backgroundColor=UIColor.clearColor()
             self.contents.append(content)
             self.addSubview(content)
-            
             x += self.contentDistance
         }
+        
+        self.contents[0].transform = CGAffineTransformMakeScale(1,0.8)
+        self.contents[2].transform = CGAffineTransformMakeScale(1,0.8)
     }
     
     private func nextIndex(currentIndex:Int)->Int{
