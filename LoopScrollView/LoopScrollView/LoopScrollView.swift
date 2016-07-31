@@ -122,8 +122,6 @@ internal class ContentView:UIView {
             content.layer.addAnimation(scaleAnimation, forKey: "ScaleCard")
         }
         
-        //self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
-        
         switch direction {
         case .Right:
             //move the last card to first
@@ -135,7 +133,6 @@ internal class ContentView:UIView {
         
         self.contents[self.contents.count - 1].transform = CGAffineTransformMakeScale(1,0.8)
         self.contents = self.contents.sort{ $0.layer.position.x < $1.layer.position.x }
-        //preload(direction)
     }
     
     private func preload(direction:Direction){
@@ -186,14 +183,11 @@ internal class ContentView:UIView {
         for view in self.subviews{
             view.removeFromSuperview()
         }
+        
         self.contents=[]
         self.contentSize = CGSizeMake(frame.width*self.scale.widthScale, frame.height*self.scale.heightScale)
         self.contentSpace = frame.width*(1-self.scale.widthScale)/4
         self.contentDistance = self.contentSpace + self.contentSize.width
-        
-//        print("self.frame=\(frame)")
-//        print("self.contentSize=\(self.contentSize)")
-//        print("self.contentSpace=\(self.contentSpace)")
         
         var x:CGFloat = 0 - self.contentSize.width + self.contentSpace
         
